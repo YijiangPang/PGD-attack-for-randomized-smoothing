@@ -21,7 +21,7 @@ class PGDL2_RS(Attack):
     r"""
     PGD for randmized smoothing in the paper 'Provably Robust Deep Learning via Adversarially Trained Smoothed Classifiers'
     [https://arxiv.org/abs/1906.04584]
-    Modification of the code from https://github.com/Hadisalman/smoothing-adversarial/blob/master/code/attacks.py and https://github.com/Harry24k/adversarial-attacks-pytorch
+    Modification of the code from https://github.com/Hadisalman/smoothing-adversarial/blob/master/code/attacks.py and 'torchattacks'
 
     Distance Measure : Linf
 
@@ -42,7 +42,7 @@ class PGDL2_RS(Attack):
         - output: :math:`(N, C, H, W)`.
 
     Examples::
-        >>> attack = PGDL2_RS(model, eps=1.0, alpha=0.2, steps=40, noise_type = "guassian", noise_sd = "0.5", noise_batch_size = "32")
+        >>> attack = torchattacks.PGDL2_RS(model, eps=1.0, alpha=0.2, steps=40, noise_type = "guassian", noise_sd = "0.5", noise_batch_size = "32")
         >>> adv_images = attack(images, labels)
 
     """
@@ -79,12 +79,11 @@ class PGDL2_RS(Attack):
         images = images.clone().detach().to(self.device)
         labels = labels.clone().detach().to(self.device)
         #expend the inputs over noise_batch_size
-        shape = torch.Size([images.shape[0], self.noise_batch_size]) + images.shape[1:]
-        inputs_exp = images.unsqueeze(1).expand(shape)
+        shape_exp = torch.Size([images.shape[0], self.noise_batch_size]) + images.shape[1:]
+        inputs_exp = images.unsqueeze(1).expand(shape_exp)
         inputs_exp = inputs_exp.reshape(torch.Size([-1]) + inputs_exp.shape[2:])
-        shape_exp = inputs_exp.shape
         noise_added = self.noise_func(inputs_exp.view(len(inputs_exp), -1))
-        noise_added = noise_added.view(shape_exp)
+        noise_added = noise_added.view(inputs_exp.shape)
 
         data_batch_size = labels.shape[0]
         delta = torch.zeros((len(labels), *inputs_exp.shape[1:]), requires_grad=True, device=self.device)
@@ -96,7 +95,7 @@ class PGDL2_RS(Attack):
         for _ in range(self.steps):
             delta.requires_grad = True
             #img_adv is the perturbed data for randmized smoothing
-            img_adv = inputs_exp + delta.unsqueeze(1).repeat((1, self.noise_batch_size, 1, 1, 1)).view_as(inputs_exp)#delta.repeat(1,self.noise_batch_size,1,1)
+            img_adv = inputs_exp + delta.unsqueeze(1).expand(shape_exp).reshape(inputs_exp.shape)
             img_adv = torch.clamp(img_adv, min=0, max=1)   
 
             adv_noise = img_adv + noise_added
