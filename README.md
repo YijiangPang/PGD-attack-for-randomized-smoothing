@@ -9,7 +9,7 @@ This code is based on these resources:
 
 Note: Applying EOT startegy for PGD attack when inference involving randomness, but why?
 
-It becomes a two-stage stochastic prohramming problem, and the solution is Sample Average Approximation (SAA).
+It becomes a two-stage stochastic programming problem, and the solution is Sample Average Approximation (SAA).
 
 # Requirements
 - torchattacks
