@@ -7,5 +7,9 @@ This code is based on these resources:
 1. [smoothing-adversarial](https://github.com/Hadisalman/smoothing-adversarial)
 2. [torchattacks](https://github.com/Harry24k/adversarial-attacks-pytorch)
 
+Note: Applying EOT startegy for PGD attack when inference involving randomness, but why?
+
+It becomes a two-stage stochastic prohramming problem, and the solution is Sample Average Approximation (SAA).
+
 # Requirements
 - torchattacks
